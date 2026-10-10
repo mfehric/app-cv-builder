@@ -1,0 +1,42 @@
+{
+  "id": "cv-builder",
+  "package_id": "5b3a7b73-d018-48ae-9fa6-be7641563a59",
+  "name": "CV Builder",
+  "version": "0.2.0",
+  "description": "One mega profile about you, then a CV tailored to every position, with a gap analysis.",
+  "entry": "index.jsx",
+  "icon": "icon.png",
+  "author": "mfehric",
+  "license": "MIT",
+  "homepage": "https://github.com/mfehric/app-cv-builder",
+  "offline_capable": false,
+  "permissions": {},
+  "source_files": ["cv-cli.mjs", "pdf.js", "docx.js", "LICENSE"],
+  "schedule": { "default": "0 7 * * *", "user_configurable": false, "job": "fetch.py" },
+  "store": {
+    "tagline": "One profile about you, a CV tailored to every job — with a fit score and gap analysis.",
+    "description": "CV Builder turns one \"mega profile\" into a sharp, tailored CV for every internship, job or research position you apply to.\n\nWrite everything about yourself once — education, experience, projects, research, awards and skills — or import an existing CV from a PDF or Word file and review what gets added. Then, for any position, the app builds a CV focused on that role and tells you how well you fit: a fit score out of 100, what you already have, what is missing, and concrete ways to close the gap before the deadline. Each tailored CV comes with a ready-to-send PDF and an editable Word file.\n\nDiscover collects open internships, junior roles, research positions, grants and programmes every day from public job boards, and an on-demand AI search looks further. Track the ones you like, filter by type and region, and keep an eye on deadlines and application status in one place.\n\nAvailable in English and Bosnian. Your data stays in this app's private storage on your own Möbius — it is only sent to your AI provider when you press an AI button. The app never invents experience; it works only from what you write.",
+    "screenshots": [
+      {
+        "src": "static/store/02-tailor.png",
+        "alt": "A tailored CV view for a Software Engineering Intern position at Spotify, showing a fit score of 82 out of 100 with a short summary and a list of matching strengths.",
+        "label": "A fit score and gap analysis for every position"
+      },
+      {
+        "src": "static/store/01-positions.png",
+        "alt": "The Positions tab listing three tracked roles with status pills, days left until each deadline and a fit score, plus an upcoming-deadlines card at the top.",
+        "label": "Track positions, deadlines and application status"
+      },
+      {
+        "src": "static/store/03-profile.png",
+        "alt": "The Profile tab with an import-an-existing-CV card and a Basics form filled with name, headline, email, phone, location and work authorisation.",
+        "label": "One mega profile, or import an existing CV"
+      },
+      {
+        "src": "static/store/04-discover.png",
+        "alt": "The Discover tab with type and region filters and a daily list of open roles, each with a match score and a Track button.",
+        "label": "Discover open roles every day, filter and track"
+      }
+    ]
+  }
+}

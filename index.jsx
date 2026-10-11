@@ -2,6 +2,18 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { Plus, Trash, Copy, Check, Document, Sparkles, ArrowLeft, Calendar, Link, Reload } from '@openai/apps-sdk-ui/components/Icon'
 
 // Fast, local relevance hint (no AI): how many of the profile's own terms show up in an ad.
+import { buildLatex } from './latex.js'
+
+// Overleaf's "open a snippet" endpoint: a top-level POST creates a new project from the .tex.
+function openInOverleaf(tex, name) {
+  const form = document.createElement('form')
+  form.method = 'POST'; form.action = 'https://www.overleaf.com/docs'; form.target = '_blank'
+  for (const [k, v] of [['encoded_snip', encodeURIComponent(tex)], ['snip_name', name], ['engine', 'pdflatex']]) {
+    const i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = v; form.appendChild(i)
+  }
+  document.body.appendChild(form); form.submit(); form.remove()
+}
+
 const STOP = new Set('i a an and or the to of in for with on at is are as be we you your our new that this will can who have has from role roles team work experience skills student students program per год'.split(' '))
 const tokenize = (s) => ((s || '').toLowerCase().match(/[a-zčćđšž0-9+#.]{3,}/gi) || []).filter((t) => !STOP.has(t))
 function profileTokenSet(profile) {
@@ -353,10 +365,12 @@ function JobForm({ onSave, onCancel }) {
 
 function JobDetail({ job, result, busy, onBack, onTailor, onUpdate, onDelete, chatId, openChat, visa, onCheckVisa }) {
   const [copied, setCopied] = useState(false)
-  const copy = async () => {
-    const ok = await window.mobius.clipboard.writeText(result.cv_markdown || '')
-    if (ok) { setCopied(true); setTimeout(() => setCopied(false), 1500) }
+  const copy = async (what) => {
+    const text = what === 'tex' ? buildLatex(result.cv_markdown) : result.cv_markdown || ''
+    const ok = await window.mobius.clipboard.writeText(text)
+    if (ok) { setCopied(what); setTimeout(() => setCopied(false), 1500) }
   }
+  const overleafName = `CV ${job.company || ''} ${job.title || ''}`.replace(/\s+/g, ' ').trim().slice(0, 80)
   return (
     <div>
       <button className="cvb-btn" onClick={onBack}><ArrowLeft width={16} height={16} /> {L('Positions', 'Pozicije')}</button>
@@ -394,8 +408,10 @@ function JobDetail({ job, result, busy, onBack, onTailor, onUpdate, onDelete, ch
             <div className="cvb-row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
               <h3 style={{ margin: 0 }}>{L('Tailored CV', 'Prilagođen CV')}</h3>
               <div className="cvb-row">
-              {chatId && <button className="cvb-btn pri" onClick={() => openChat(chatId)}><Document width={16} height={16} /> {L('PDF & Word (in chat)', 'PDF i Word (u chatu)')}</button>}
-              <button className="cvb-btn" onClick={copy}>{copied ? <Check width={16} height={16} /> : <Copy width={16} height={16} />} {copied ? L('Copied', 'Kopirano') : L('Copy', 'Kopiraj')}</button>
+              {chatId && <button className="cvb-btn pri" onClick={() => openChat(chatId)}><Document width={16} height={16} /> {L('PDF, Word & LaTeX (in chat)', 'PDF, Word i LaTeX (u chatu)')}</button>}
+              <button className="cvb-btn" onClick={() => openInOverleaf(buildLatex(result.cv_markdown), overleafName)}><Link width={16} height={16} /> {L('Open in Overleaf', 'Otvori u Overleafu')}</button>
+              <button className="cvb-btn" onClick={() => copy('tex')}>{copied === 'tex' ? <Check width={16} height={16} /> : <Copy width={16} height={16} />} {copied === 'tex' ? L('Copied', 'Kopirano') : 'LaTeX'}</button>
+              <button className="cvb-btn" onClick={() => copy('md')}>{copied === 'md' ? <Check width={16} height={16} /> : <Copy width={16} height={16} />} {copied === 'md' ? L('Copied', 'Kopirano') : L('Copy', 'Kopiraj')}</button>
               </div>
             </div>
             <div className="cvb-cv">{result.cv_markdown}</div>
@@ -607,7 +623,7 @@ function GuideTab() {
     [L('1. Fill in your Profile', '1. Popuni Profil'), L('Write everything about yourself: education, experience, projects, research, awards, skills and anything else. More detail gives better CVs. Already have a CV? Use “Import an existing CV” to fill it in from a PDF or Word file. Be honest: the AI only uses what is here and never invents experience.', 'Upiši sve o sebi: obrazovanje, iskustvo, projekte, istraživanje, nagrade, vještine i ostalo. Što više detalja, to bolji CV. Već imaš CV? Koristi „Uvezi postojeći CV“ da se profil popuni iz PDF ili Word fajla. Budi iskren/a: AI koristi samo ono što je ovdje i nikad ne izmišlja iskustvo.')],
     [L('2. Find positions in Discover', '2. Nađi pozicije u Otkrij'), L('A free list of open internships and junior roles is collected every day from GitHub lists and company job boards. Filter by type and region, search, and press Track on the ones you like. “AI search” looks further for research positions, grants and spring weeks (uses AI).', 'Besplatna lista otvorenih praksi i junior pozicija prikuplja se svaki dan s GitHub lista i stranica kompanija. Filtriraj po tipu i regiji, pretraži i klikni Prati na one koje želiš. “AI pretraga” traži dalje: istraživačke pozicije, grantove i spring week programe (koristi AI).')],
     [L('3. Manage them in Positions', '3. Vodi ih u Pozicijama'), L('Each tracked position shows its deadline, date posted and your status (Interested, Applied, Interview, Rejected, Offer). You can also add one by hand and paste the posting text.', 'Svaka praćena pozicija ima rok, datum objave i tvoj status (Zanima me, Aplicirano, Intervju, Odbijeno, Ponuda). Možeš dodati i ručno uz zalijepljen tekst oglasa.')],
-    [L('4. Tailor your CV', '4. Prilagodi CV'), L('Open a position and press Tailor CV. The AI picks and orders the most relevant parts of your profile and gives a fit score, what you already have, what is missing and how to fix it before the deadline. A PDF (for application systems) and an editable Word file are attached in the AI chat.', 'Otvori poziciju i klikni Prilagodi CV. AI bira i slaže najrelevantnije iz profila te daje ocjenu podudarnosti, šta već imaš, šta fali i kako to popraviti prije roka. PDF (za sisteme prijave) i uređivljiv Word fajl dobiješ u AI chatu.')],
+    [L('4. Tailor your CV', '4. Prilagodi CV'), L('Open a position and press Tailor CV. The AI picks and orders the most relevant parts of your profile and gives a fit score, what you already have, what is missing and how to fix it before the deadline. A PDF (for application systems), an editable Word file and a LaTeX file are attached in the AI chat, and Open in Overleaf creates a ready-to-edit Overleaf project from the CV.', 'Otvori poziciju i klikni Prilagodi CV. AI bira i slaže najrelevantnije iz profila te daje ocjenu podudarnosti, šta već imaš, šta fali i kako to popraviti prije roka. PDF (za sisteme prijave), uređivljiv Word i LaTeX fajl dobiješ u AI chatu, a Otvori u Overleafu pravi gotov Overleaf projekat od CV-a.')],
   ]
   const faq = [
     [L('What costs AI usage?', 'Šta troši AI?'), L('Only Tailor CV, Check visa and AI search, each when you press the button. Opening the app and the daily Discover refresh use no AI.', 'Samo Prilagodi CV, Provjeri vizu i AI pretraga, i to kad klikneš dugme. Otvaranje aplikacije i dnevno osvježavanje Otkrij ne koriste AI.')],
@@ -729,7 +745,7 @@ ${job.text && job.text.length > 200 ? `Tekst:\n"""\n${job.text}\n"""` : `Tekst o
 3. Odredi tip uloge (npr. software engineering, data science, quant finance, istraživanje/akademska) i složi CV samo iz činjenica iz profila. NIKAD ne izmišljaj iskustvo, brojke ni vještine. Izaberi i poredaj ono najrelevantnije, preformuliši u jeziku oglasa, naglasi tražene ključne riječi koje korisnik stvarno ima. Ako profil ima premalo podataka, to navedi među prazninama. Ako oglas ograničava državljanstvo, radnu dozvolu ili sponzorisanje vize, to također navedi među prazninama.
 4. Zapiši rezultat kao JSON u /data/apps/${appId}/results/${job.id}.json (napravi folder ako ne postoji), tačno ovog oblika:
 {"at": ${at}, "role_type": "...", "fit": <0-100 cijeli broj>, "summary": "<2 rečenice zašto je to ocjena>", "strengths": ["..."], "gaps": ["<šta fali i konkretno kako to popraviti prije roka>"], "cv_markdown": "<cijeli CV u markdownu, spreman za kopiranje>"}
-Polje "at" mora biti baš ta brojka. Zatim napravi PDF i Word (uređivljiv) fajl: node /data/apps/cv-builder/cv-cli.mjs /data/apps/${appId}/results/${job.id}.json "${fileBase}" (oba se pojave u ovom chatu kao preuzimanje). Nemoj mijenjati druge fajlove. Na kraju u chatu kratko (2-3 rečenice) reci šta si našao.` : `Tailor a CV for a position in the CV Builder app (app id ${appId}). Write everything (summary, strengths, gaps and the CV) in English.
+Polje "at" mora biti baš ta brojka. Zatim napravi PDF, Word (uređivljiv) i LaTeX (.tex, za Overleaf) fajl: node /data/apps/cv-builder/cv-cli.mjs /data/apps/${appId}/results/${job.id}.json "${fileBase}" (sva tri se pojave u ovom chatu kao preuzimanje). Nemoj mijenjati druge fajlove. Na kraju u chatu kratko (2-3 rečenice) reci šta si našao.` : `Tailor a CV for a position in the CV Builder app (app id ${appId}). Write everything (summary, strengths, gaps and the CV) in English.
 
 1. Read the profile: /data/apps/${appId}/profile.json (the user's mega profile: basics, education, experience, projects, research, awards, skills, other).
 2. Job posting:
@@ -741,7 +757,7 @@ ${job.text && job.text.length > 200 ? `Text:\n"""\n${job.text}\n"""` : `The post
 3. Decide the role type (e.g. software engineering, data science, quant finance, research/academic) and build the CV only from facts in the profile. NEVER invent experience, numbers or skills. Choose and order the most relevant material, rephrase it in the language of the posting, and emphasize the requested keywords the user actually has. If the profile has too little data, list that among the gaps. If the posting restricts citizenship, work authorisation or visa sponsorship, list that among the gaps too.
 4. Write the result as JSON to /data/apps/${appId}/results/${job.id}.json (create the folder if needed), in exactly this shape:
 {"at": ${at}, "role_type": "...", "fit": <integer 0-100>, "summary": "<2 sentences on why that score>", "strengths": ["..."], "gaps": ["<what is missing and concretely how to fix it before the deadline>"], "cv_markdown": "<the whole CV in markdown, ready to copy>"}
-The "at" field must be exactly that number. Then create a PDF and an editable Word file: node /data/apps/cv-builder/cv-cli.mjs /data/apps/${appId}/results/${job.id}.json "${fileBase}" (both appear in this chat as downloads). Do not change other files. At the end, reply in chat in 2-3 short sentences saying what you found.`
+The "at" field must be exactly that number. Then create a PDF, an editable Word file and a LaTeX (.tex, for Overleaf) file: node /data/apps/cv-builder/cv-cli.mjs /data/apps/${appId}/results/${job.id}.json "${fileBase}" (all three appear in this chat as downloads). Do not change other files. At the end, reply in chat in 2-3 short sentences saying what you found.`
     try {
       const { chatId } = await window.mobius.chat.start({ draft: prompt, title: `CV: ${job.title}`.slice(0, 80) })
       await saveJobs(jobs.map((x) => (x.id === job.id ? { ...x, pendingSince: at, chatId } : x)))

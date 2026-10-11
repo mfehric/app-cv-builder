@@ -9,7 +9,7 @@ The app is English by default; use the EN / BS toggle in the header for Bosnian 
 
 Results are saved to `results/<id>.json` in the app storage.
 
-Export: when tailoring, the AI attaches a PDF and an editable Word file (.docx) via `cv-cli.mjs`. User data lives in app storage, not in the source, so the app can be shared.
+Export: when tailoring, the AI attaches a PDF, an editable Word file (.docx) and a LaTeX file (.tex) via `cv-cli.mjs`. The tailored-CV view also has **Open in Overleaf** (creates an Overleaf project from the CV via `latex.js`, compiles with pdfLaTeX or XeLaTeX) and **Copy LaTeX**. User data lives in app storage, not in the source, so the app can be shared.
 
 ## Notes for new users
 

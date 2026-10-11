@@ -2,7 +2,7 @@
   "id": "cv-builder",
   "package_id": "5b3a7b73-d018-48ae-9fa6-be7641563a59",
   "name": "CV Builder",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "One mega profile about you, then a CV tailored to every position, with a gap analysis.",
   "entry": "index.jsx",
   "icon": "icon.png",
@@ -11,11 +11,11 @@
   "homepage": "https://github.com/mfehric/app-cv-builder",
   "offline_capable": false,
   "permissions": {},
-  "source_files": ["cv-cli.mjs", "pdf.js", "docx.js", "LICENSE"],
+  "source_files": ["cv-cli.mjs", "pdf.js", "docx.js", "latex.js", "LICENSE"],
   "schedule": { "default": "0 7 * * *", "user_configurable": false, "job": "fetch.py" },
   "store": {
     "tagline": "One profile about you, a CV tailored to every job — with a fit score and gap analysis.",
-    "description": "CV Builder turns one \"mega profile\" into a sharp, tailored CV for every internship, job or research position you apply to.\n\nWrite everything about yourself once — education, experience, projects, research, awards and skills — or import an existing CV from a PDF or Word file and review what gets added. Then, for any position, the app builds a CV focused on that role and tells you how well you fit: a fit score out of 100, what you already have, what is missing, and concrete ways to close the gap before the deadline. Each tailored CV comes with a ready-to-send PDF and an editable Word file.\n\nDiscover collects open internships, junior roles, research positions, grants and programmes every day from public job boards, and an on-demand AI search looks further. Track the ones you like, filter by type and region, and keep an eye on deadlines and application status in one place.\n\nAvailable in English and Bosnian. Your data stays in this app's private storage on your own Möbius — it is only sent to your AI provider when you press an AI button. The app never invents experience; it works only from what you write.",
+    "description": "CV Builder turns one \"mega profile\" into a sharp, tailored CV for every internship, job or research position you apply to.\n\nWrite everything about yourself once — education, experience, projects, research, awards and skills — or import an existing CV from a PDF or Word file and review what gets added. Then, for any position, the app builds a CV focused on that role and tells you how well you fit: a fit score out of 100, what you already have, what is missing, and concrete ways to close the gap before the deadline. Each tailored CV comes with a ready-to-send PDF, an editable Word file and a LaTeX version you can open in Overleaf with one click.\n\nDiscover collects open internships, junior roles, research positions, grants and programmes every day from public job boards, and an on-demand AI search looks further. Track the ones you like, filter by type and region, and keep an eye on deadlines and application status in one place.\n\nAvailable in English and Bosnian. Your data stays in this app's private storage on your own Möbius — it is only sent to your AI provider when you press an AI button. The app never invents experience; it works only from what you write.",
     "screenshots": [
       {
         "src": "static/store/02-tailor.png",
